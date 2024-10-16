@@ -8,28 +8,30 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
 import java.util.Optional;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.Iterator;
 
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
+
     @Autowired
     private CustomerRepository customerRepository;
-
-    private List<Customer> customerList = new ArrayList<>();
 
     public CustomerController() {
     }
 
     @GetMapping
     public List<Customer> getAll() {
-       return customerRepository.findAll(); // Fetch all customers from the database
+        return customerRepository.findAll(); // Fetch all customers from the database
     }
 
     @GetMapping("/{customerId}")
@@ -39,8 +41,24 @@ public class CustomerController {
                        .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()); // Return 404 if not found
     }
 
+    // Lookup customer by name (GET)
+    @GetMapping("/byname/{username}")
+    public ResponseEntity<?> lookupCustomerByNameGet(@PathVariable("username") String username,
+            UriComponentsBuilder uri) {
+        logger.info("username: " + username); // Using SLF4J for logging
+
+        Iterator<Customer> customers = customerRepository.findAll().iterator();
+        while(customers.hasNext()) {
+            Customer cust = customers.next();
+            if(cust.getName().equalsIgnoreCase(username)) {
+                return ResponseEntity.ok(cust); // Return found customer
+            }			
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Return bad request if not found
+    }
+	
     @PostMapping
-    public ResponseEntity<?> addCustomer(@RequestBody Customer newCustomer , UriComponentsBuilder uri) {
+    public ResponseEntity<?> addCustomer(@RequestBody Customer newCustomer, UriComponentsBuilder uri) {
         if (newCustomer.getId() != null) {
             return ResponseEntity.badRequest().build(); // Reject if ID is provided
         }

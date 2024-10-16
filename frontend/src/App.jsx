@@ -16,7 +16,8 @@ function CustomersModule() {
   return (
     <div>
       <CustomerList></CustomerList>
-      <CustomerForm></CustomerForm>     
+      <CustomerForm></CustomerForm>
+      <Footer></Footer>      
     </div>
   );
 }
@@ -70,7 +71,7 @@ function compare(a, b){
 
 function Custom(props){
 
-  if(  compare(props.login.loginstate, 'logged-in')){
+  if(  !compare(props.login.loginstate, 'logged-in')){
     console.log("NOT loggedin");
     return ( 
       <Login></Login>
@@ -97,7 +98,7 @@ function App({login}) {
   return (
     <Router>
     <div className="App">
-        <h1>Customer CRUD App</h1>
+        <h1>Customer App Secured</h1>
         <Custom login={login} />
     </div>
     </Router>
