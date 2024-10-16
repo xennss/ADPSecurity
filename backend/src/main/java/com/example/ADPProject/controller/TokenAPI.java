@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 @RestController
 @RequestMapping("/account") // Ruta base
@@ -32,7 +31,8 @@ public class TokenAPI {
         String username = customer.getName();
         String password = customer.getPassword();
 
-        if (checkPassword(username, password)) {
+        // Falta el checkpassword que el treiem nomes per mirar si va el funcionament de fer un token
+		if (username != null && username.length() > 0 && password != null && password.length() > 0 ) {
             Token token = createToken(username);
             return ResponseEntity.ok(token);
         }
@@ -50,8 +50,15 @@ public class TokenAPI {
     }
 
     private Token createToken(String username) {
-        String tokenString = JWTHelper.createToken(username);
-        return new Token(tokenString);
+        String scopes = "com.webage.data.apis";
+    	// special case for application user
+    	if( username.equalsIgnoreCase("ApiClientApp")) {
+    		scopes = "com.webage.auth.apis";
+    	}
+    	String token_string = JWTHelper.createToken(scopes);
+    	
+    	
+    	return new Token(token_string);
     }
 
     public Token getAppUserToken() {
